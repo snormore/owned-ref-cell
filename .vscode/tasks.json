@@ -64,6 +64,19 @@
                 "kind": "test",
                 "isDefault": "true"
             }
+        },
+        {
+            "label": "bench",
+            "type": "shell",
+            "command": "cargo bench",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "lint",
+            "group": {
+                "kind": "test",
+                "isDefault": "false"
+            }
         }
     ]
 }
