@@ -4,6 +4,7 @@
 
 ![Tests](https://github.com/snormore/owned-ref-cell/actions/workflows/tests.yml/badge.svg)
 ![Lints](https://github.com/snormore/owned-ref-cell/actions/workflows/lints.yml/badge.svg)
+![Docs](https://github.com/snormore/owned-ref-cell/actions/workflows/docs.yml/badge.svg)
 
 ## Features
 
@@ -53,7 +54,7 @@ fn main() {
 
 ## Documentation
 
-For more detailed documentation, run the following command to generate docs and view them in your browser:
+Find more detailed documentation [here](https://snormore.github.io/owned-ref-cell), or run the following command to generate docs and view them in your browser:
 
 ```bash
 cargo doc --open
