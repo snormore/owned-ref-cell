@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "ownedrefcell"
+name = "owned_ref_cell"
 version = "0.1.0"

@@ -31,7 +31,7 @@
 //! Basic usage:
 //!
 //! ```
-//! use ownedrefcell::OwnedRefCell;
+//! use owned_ref_cell::OwnedRefCell;
 //! let cell = OwnedRefCell::new(42);
 //!
 //! {
