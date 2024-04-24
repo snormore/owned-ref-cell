@@ -8,9 +8,8 @@ use test::Bencher;
 fn bench_borrow_mut(b: &mut Bencher) {
     let cell = OwnedRefCell::new(42);
     b.iter(|| {
-        // Perform the mutable borrow inside the testing loop
         for _ in 0..1000 {
-            test::black_box(cell.try_borrow_mut());
+            test::black_box(cell.borrow_mut());
         }
     });
 }
@@ -19,45 +18,50 @@ fn bench_borrow_mut(b: &mut Bencher) {
 fn bench_borrow(b: &mut Bencher) {
     let cell = OwnedRefCell::new(42);
     b.iter(|| {
-        // Perform the immutable borrow inside the testing loop
         for _ in 0..1000 {
-            test::black_box(cell.try_borrow());
+            test::black_box(cell.borrow());
         }
     });
 }
 
 #[bench]
-fn bench_borrow_mut_borrow(b: &mut Bencher) {
+fn bench_borrow_after_borrow(b: &mut Bencher) {
     let cell = OwnedRefCell::new(OwnedRefCell::new(42));
     b.iter(|| {
-        let outer_borrow = cell.borrow_mut();
+        let _ref = cell.borrow();
+
         for _ in 0..1000 {
-            // Perform an inner borrow operation within an outer borrow
-            let _inner_borrow = outer_borrow.borrow();
+            test::black_box(cell.borrow());
         }
     });
 }
 
 #[bench]
-fn bench_borrow_mut_borrow_mut(b: &mut Bencher) {
+fn bench_borrow_after_borrow_mut_fails(b: &mut Bencher) {
     let cell = OwnedRefCell::new(OwnedRefCell::new(42));
     b.iter(|| {
-        let outer_borrow = cell.borrow_mut();
+        let _ref = cell.borrow_mut();
+
         for _ in 0..1000 {
-            // Perform an inner borrow operation within an outer borrow
-            let _inner_borrow = outer_borrow.try_borrow_mut();
+            assert!(
+                cell.try_borrow().is_none(),
+                "Expected failure, but succeeded"
+            );
         }
     });
 }
 
 #[bench]
-fn bench_borrow_borrow_mut(b: &mut Bencher) {
+fn bench_borrow_mut_after_borrow_mut_fails(b: &mut Bencher) {
     let cell = OwnedRefCell::new(OwnedRefCell::new(42));
     b.iter(|| {
-        let outer_borrow = cell.borrow();
+        let _ref = cell.borrow_mut();
+
         for _ in 0..1000 {
-            // Perform an inner borrow operation within an outer borrow
-            let _inner_borrow = outer_borrow.try_borrow_mut();
+            assert!(
+                cell.try_borrow_mut().is_none(),
+                "Expected failure, but succeeded"
+            );
         }
     });
 }

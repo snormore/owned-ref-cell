@@ -6,8 +6,8 @@
 //! is more nuanced.
 //!
 //! The main class in this module, `OwnedRefCell<T>`, provides an interface similar to `RefCell<T>`,
-//! allowing both mutable and immutable borrows, tracked at runtime to ensure that there are no data races.
-//! `OwnedRefCell<T>` should be used when you need temporary mutable access to data inside a data
+//! allowing both mutable and immutable borrows, tracked at runtime to ensure that there are no value races.
+//! `OwnedRefCell<T>` should be used when you need temporary mutable access to value inside a value
 //! structure that does not itself provide intrinsic mutable access.
 //!
 //! # Differences from `RefCell`
@@ -24,7 +24,7 @@
 //!
 //! Unlike `RefCell<T>`, `OwnedRefCell<T>` uses `Rc<T>` to track the borrowing state, and thus it is not
 //! thread-safe. It is meant for use only in single-threaded scenarios. Attempting to use `OwnedRefCell<T>`
-//! in a multithreaded context may lead to data races and is not supported.
+//! in a multithreaded context may lead to value races and is not supported.
 //!
 //! # Examples
 //!
@@ -54,45 +54,45 @@
 //!
 //! This module also provides:
 //!
-//! - `OwnedRef<T>`: an owned, immutable reference to the data inside an `OwnedRefCell<T>`.
-//! - `OwnedRefMut<T>`: an owned, mutable reference to the data inside an `OwnedRefCell<T>`.
+//! - `OwnedRef<T>`: an owned, immutable reference to the value inside an `OwnedRefCell<T>`.
+//! - `OwnedRefMut<T>`: an owned, mutable reference to the value inside an `OwnedRefCell<T>`.
 
 use std::cell::{RefCell, UnsafeCell};
 use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 
-/// Provides mutable or immutable access to encapsulated data with owned references.
+/// Provides mutable or immutable access to encapsulated value with owned references.
 pub struct OwnedRefCell<T> {
-    data: UnsafeCell<T>,
-    borrow_state: Rc<RefCell<BorrowState>>,
+    value: UnsafeCell<T>,
+    state: Rc<RefCell<BorrowState>>,
 }
 
 /// Internal state to keep track of the borrowing status.
 struct BorrowState {
-    mutable_borrowed: bool,
-    immutable_borrow_count: usize,
+    is_writing: bool,
+    reading_count: usize,
 }
 
-/// An immutable reference to the data within `OwnedRefCell`.
+/// An immutable reference to the value within `OwnedRefCell`.
 pub struct OwnedRef<T> {
-    data: *const T,
-    borrow_state: Rc<RefCell<BorrowState>>,
+    value: *const T,
+    state: Rc<RefCell<BorrowState>>,
 }
 
-/// A mutable reference to the data within `OwnedRefCell`.
+/// A mutable reference to the value within `OwnedRefCell`.
 pub struct OwnedRefMut<T> {
-    data: *mut T,
-    borrow_state: Rc<RefCell<BorrowState>>,
+    value: *mut T,
+    state: Rc<RefCell<BorrowState>>,
 }
 
 impl<T> OwnedRefCell<T> {
-    /// Constructs a new `OwnedRefCell` with the specified data.
-    pub fn new(data: T) -> Self {
+    /// Constructs a new `OwnedRefCell` with the specified value.
+    pub fn new(value: T) -> Self {
         OwnedRefCell {
-            data: UnsafeCell::new(data),
-            borrow_state: Rc::new(RefCell::new(BorrowState {
-                mutable_borrowed: false,
-                immutable_borrow_count: 0,
+            value: UnsafeCell::new(value),
+            state: Rc::new(RefCell::new(BorrowState {
+                is_writing: false,
+                reading_count: 0,
             })),
         }
     }
@@ -114,14 +114,14 @@ impl<T> OwnedRefCell<T> {
     /// Tries to immutably borrow the cell.
     /// Returns `None` if the cell is already borrowed mutably.
     pub fn try_borrow(&self) -> Option<OwnedRef<T>> {
-        let mut borrow_state = self.borrow_state.borrow_mut();
-        if borrow_state.mutable_borrowed {
+        let mut state = self.state.borrow_mut();
+        if state.is_writing {
             None
         } else {
-            borrow_state.immutable_borrow_count += 1;
+            state.reading_count += 1;
             Some(OwnedRef {
-                data: self.data.get(),
-                borrow_state: Rc::clone(&self.borrow_state),
+                value: self.value.get(),
+                state: Rc::clone(&self.state),
             })
         }
     }
@@ -129,14 +129,14 @@ impl<T> OwnedRefCell<T> {
     /// Tries to mutably borrow the cell.
     /// Returns `None` if the cell is already borrowed immutably or mutably.
     pub fn try_borrow_mut(&self) -> Option<OwnedRefMut<T>> {
-        let mut borrow_state = self.borrow_state.borrow_mut();
-        if borrow_state.mutable_borrowed || borrow_state.immutable_borrow_count > 0 {
+        let mut state = self.state.borrow_mut();
+        if state.is_writing || state.reading_count > 0 {
             None
         } else {
-            borrow_state.mutable_borrowed = true;
+            state.is_writing = true;
             Some(OwnedRefMut {
-                data: self.data.get(),
-                borrow_state: Rc::clone(&self.borrow_state),
+                value: self.value.get(),
+                state: Rc::clone(&self.state),
             })
         }
     }
@@ -147,7 +147,7 @@ impl<T> Deref for OwnedRef<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.data }
+        unsafe { &*self.value }
     }
 }
 
@@ -156,14 +156,14 @@ impl<T> Deref for OwnedRefMut<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.data }
+        unsafe { &*self.value }
     }
 }
 
 /// Implements `DerefMut` for `OwnedRefMut` to allow dereferencing the owned mutable reference.
 impl<T> DerefMut for OwnedRefMut<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { &mut *self.data }
+        unsafe { &mut *self.value }
     }
 }
 
@@ -171,16 +171,16 @@ impl<T> DerefMut for OwnedRefMut<T> {
 /// references are dropped.
 impl<T> Drop for OwnedRef<T> {
     fn drop(&mut self) {
-        let mut borrow_state = self.borrow_state.borrow_mut();
-        borrow_state.immutable_borrow_count -= 1;
+        let mut state = self.state.borrow_mut();
+        state.reading_count -= 1;
     }
 }
 
 /// Implements `Drop` for `OwnedRefMut` to update the borrowing state when the reference is dropped.
 impl<T> Drop for OwnedRefMut<T> {
     fn drop(&mut self) {
-        let mut borrow_state = self.borrow_state.borrow_mut();
-        borrow_state.mutable_borrowed = false;
+        let mut state = self.state.borrow_mut();
+        state.is_writing = false;
     }
 }
 
