@@ -191,20 +191,18 @@ mod tests {
     use super::*;
 
     #[test]
-    fn single_borrow_and_modify() {
+    fn borrow_mut_modify_and_borrow_after_drop() {
         let cell = OwnedRefCell::new(10);
         {
             let mut b = cell.borrow_mut();
             *b = 20;
         }
-        {
-            let b = cell.borrow();
-            assert_eq!(*b, 20);
-        }
+        let b = cell.borrow();
+        assert_eq!(*b, 20);
     }
 
     #[test]
-    fn cannot_borrow_mut_while_immutable_borrowed() {
+    fn cannot_borrow_mut_while_immutably_borrowed() {
         let cell = OwnedRefCell::new(10);
         let _b = cell.borrow();
         assert!(cell.try_borrow_mut().is_none());
@@ -218,6 +216,13 @@ mod tests {
     }
 
     #[test]
+    fn cannot_borrow_mut_while_mutably_borrowed() {
+        let cell = OwnedRefCell::new(10);
+        let _b = cell.borrow_mut();
+        assert!(cell.try_borrow_mut().is_none());
+    }
+
+    #[test]
     fn multiple_immutable_borrows() {
         let cell = OwnedRefCell::new(10);
         let b1 = cell.try_borrow().unwrap();
@@ -227,24 +232,7 @@ mod tests {
     }
 
     #[test]
-    fn mixed_borrows_fail() {
-        let cell = OwnedRefCell::new(10);
-        let _b1 = cell.borrow();
-        assert!(cell.try_borrow_mut().is_none());
-    }
-
-    #[test]
-    fn reuse_after_drop() {
-        let cell = OwnedRefCell::new(10);
-        {
-            let _b1 = cell.borrow_mut();
-        }
-        let b2 = cell.borrow();
-        assert_eq!(*b2, 10);
-    }
-
-    #[test]
-    fn multiple_borrows_after_mut_borrow() {
+    fn multiple_immutable_borrows_after_borrow_mut() {
         let cell = OwnedRefCell::new(10);
         {
             let _b1 = cell.borrow_mut();
@@ -256,17 +244,18 @@ mod tests {
     }
 
     #[test]
-    fn borrow_fail_after_borrow_mut() {
-        let cell = OwnedRefCell::new(30);
+    fn borrow_mut_again_after_drop() {
+        let cell = OwnedRefCell::new(10);
         {
-            let mut b1 = cell.borrow_mut();
-            *b1 = 40;
+            let mut b = cell.borrow_mut();
+            *b = 20;
         }
-        assert!(cell.try_borrow_mut().is_some());
         {
-            let b2 = cell.borrow();
-            assert_eq!(*b2, 40);
+            let mut b = cell.borrow_mut();
+            *b = 30;
         }
+        let b = cell.borrow();
+        assert_eq!(*b, 30);
     }
 
     #[test]
