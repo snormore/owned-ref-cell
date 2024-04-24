@@ -2,6 +2,9 @@
 
 `OwnedRefCell` is a custom implementation of Rust's [`RefCell`](https://doc.rust-lang.org/std/cell/struct.RefCell.html) that allows for a different borrowing mechanism. Unlike `RefCell` which grants references tied to the lifetimes of borrow scopes, `OwnedRefCell` returns special owned references. These references maintain their borrowed state until they are explicitly dropped, offering more flexibility in managing lifetimes in complex or dynamic application structures.
 
+![Tests](https://github.com/snormore/owned-ref-cell/actions/workflows/tests.yml/badge.svg)
+![Lints](https://github.com/snormore/owned-ref-cell/actions/workflows/lints.yml/badge.svg)
+
 ## Features
 
 - **Owned References**: Provides `OwnedRef` and `OwnedRefMut`, which manage the borrow state internally and allow for dynamic and flexible lifetimes.
