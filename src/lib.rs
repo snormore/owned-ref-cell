@@ -183,6 +183,7 @@ impl<T> Drop for OwnedRefMut<T> {
         borrow_state.mutable_borrowed = false;
     }
 }
+
 #[cfg(test)]
 mod tests {
     use std::panic::{self, AssertUnwindSafe};
@@ -261,10 +262,7 @@ mod tests {
             let mut b1 = cell.borrow_mut();
             *b1 = 40;
         }
-        assert!(
-            cell.try_borrow_mut().is_some(),
-            "Should be able to re-borrow mutably"
-        );
+        assert!(cell.try_borrow_mut().is_some());
         {
             let b2 = cell.borrow();
             assert_eq!(*b2, 40);
