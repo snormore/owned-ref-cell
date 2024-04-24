@@ -5,6 +5,7 @@
 ![Tests](https://github.com/snormore/owned-ref-cell/actions/workflows/tests.yml/badge.svg)
 ![Lints](https://github.com/snormore/owned-ref-cell/actions/workflows/lints.yml/badge.svg)
 ![Docs](https://github.com/snormore/owned-ref-cell/actions/workflows/docs.yml/badge.svg)
+[![codecov](https://codecov.io/gh/snormore/owned-ref-cell/graph/badge.svg?token=TGH857JV5B)](https://codecov.io/gh/snormore/owned-ref-cell)
 
 ## Features
 
