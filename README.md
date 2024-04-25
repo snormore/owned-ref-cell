@@ -75,7 +75,7 @@ Contributions are welcome! Please feel free to submit pull requests, create issu
 
 ## Support
 
-If you encounter any issues or require assistance, please file an issue on the GitHub repository.
+If you encounter any issues or require assistance, please [file an issue](https://github.com/snormore/owned-ref-cell/issues/new) on the GitHub repository.
 
 ## License
 
