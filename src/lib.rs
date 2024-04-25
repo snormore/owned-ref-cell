@@ -144,7 +144,7 @@ impl<T> Deref for OwnedRef<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.value }
+        unsafe { self.value.as_ref().unwrap() }
     }
 }
 
@@ -153,14 +153,14 @@ impl<T> Deref for OwnedRefMut<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.value }
+        unsafe { self.value.as_ref().unwrap() }
     }
 }
 
 /// Implements `DerefMut` for `OwnedRefMut` to allow dereferencing the owned mutable reference.
 impl<T> DerefMut for OwnedRefMut<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        unsafe { &mut *self.value }
+        unsafe { self.value.as_mut().unwrap() }
     }
 }
 
