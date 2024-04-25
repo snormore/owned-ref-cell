@@ -10,6 +10,9 @@
 //! `OwnedRefCell<T>` should be used when you need temporary mutable access to value inside a value
 //! structure that does not itself provide intrinsic mutable access.
 //!
+//! Similar to `RefCell`, this implementation is not thread-safe; it does not implement Sync. If you need
+//! thread-safe interior mutability, consider using `Mutex`, `RwLock`, or `Atomic` types.
+//!
 //! # Differences from `RefCell`
 //!
 //! - `OwnedRefCell` provides `OwnedRef` and `OwnedRefMut`, which own their borrow status and thus
@@ -19,12 +22,6 @@
 //! - While `RefCell` reacts at runtime with panics when a borrowing rule is violated,
 //!   `OwnedRefCell` also offers methods (`try_borrow` and `try_borrow_mut`) that return `None` when
 //!   a borrow would violate the rules, allowing the caller to react without forcing a panic.
-//!
-//! # Safety
-//!
-//! Unlike `RefCell<T>`, `OwnedRefCell<T>` uses `Rc<T>` to track the borrowing state, and thus it is not
-//! thread-safe. It is meant for use only in single-threaded scenarios. Attempting to use `OwnedRefCell<T>`
-//! in a multithreaded context may lead to value races and is not supported.
 //!
 //! # Examples
 //!

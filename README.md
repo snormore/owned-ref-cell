@@ -7,6 +7,8 @@
 ![Docs](https://github.com/snormore/owned-ref-cell/actions/workflows/docs.yml/badge.svg)
 [![codecov](https://codecov.io/gh/snormore/owned-ref-cell/graph/badge.svg?token=TGH857JV5B)](https://codecov.io/gh/snormore/owned-ref-cell)
 
+The main class in this library, `OwnedRefCell<T>`, provides an interface similar to `RefCell<T>`, allowing both mutable and immutable borrows, tracked at runtime to ensure that there are no value races. `OwnedRefCell<T>` should be used when you need temporary mutable access to value inside a value structure that does not itself provide intrinsic mutable access. Similar to `RefCell`, this implementation is not thread-safe; it does not implement `Sync`. If you need thread-safe interior mutability, consider using `Mutex`, `RwLock`, or `Atomic` types.
+
 ## Features
 
 - **Owned References**: Provides `OwnedRef` and `OwnedRefMut`, which manage the borrow state internally and allow for dynamic and flexible lifetimes.
