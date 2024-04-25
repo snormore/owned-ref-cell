@@ -188,6 +188,25 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_owned_ref_cell_extend_borrow_across_scopes() {
+        let cell = OwnedRefCell::new(10);
+
+        // Function that extends the mutable borrow across its original scope
+        fn extend_borrow<T>(mut borrow: OwnedRefMut<T>, modifier: T) -> OwnedRefMut<T>
+        where
+            T: std::ops::AddAssign,
+        {
+            *borrow += modifier;
+            borrow
+        }
+
+        let borrow_mut = cell.borrow_mut();
+        let extended_borrow = extend_borrow(borrow_mut, 5);
+
+        assert_eq!(*extended_borrow, 15);
+    }
+
+    #[test]
     fn borrow_mut_modify_and_borrow_after_drop() {
         let cell = OwnedRefCell::new(10);
         {
