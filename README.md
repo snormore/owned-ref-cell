@@ -41,11 +41,17 @@ fn main() {
     {
         let value = cell.borrow();
         assert_eq!(*value, 42);
+
+        // Cannot borrow mutably when already borrowed immutably
+        assert!(cell.try_borrow_mut().is_none());
     }
 
     {
         let mut value = cell.borrow_mut();
         *value = 45;
+
+        // Cannot borrow when already borrowed mutably
+        assert!(cell.try_borrow().is_none());
     }
 
     {
