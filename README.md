@@ -34,30 +34,25 @@ Here is a simple example of how to use `OwnedRefCell`:
 
 ```rust
 use owned_ref_cell::OwnedRefCell;
+use std::collections::HashMap;
 
 fn main() {
-    let cell = OwnedRefCell::new(42);
+    let shared_map = OwnedRefCell::new(HashMap::new());
 
+    // Create a new block to limit the scope of the dynamic borrow
     {
-        let value = cell.borrow();
-        assert_eq!(*value, 42);
-
-        // Cannot borrow mutably when already borrowed immutably
-        assert!(cell.try_borrow_mut().is_none());
+        let mut map = shared_map.borrow_mut();
+        map.insert("green", 92388);
+        map.insert("blue", 11837);
+        map.insert("red", 11826);
+        map.insert("yellow", 38);
     }
 
-    {
-        let mut value = cell.borrow_mut();
-        *value = 45;
-
-        // Cannot borrow when already borrowed mutably
-        assert!(cell.try_borrow().is_none());
-    }
-
-    {
-        let value = cell.borrow();
-        assert_eq!(*value, 45);
-    }
+    // Note that if we had not let the previous borrow of the cache fall out
+    // of scope then the subsequent borrow would cause a dynamic thread panic.
+    // This is the major hazard of using `OwnedRefCell`.
+    let total: i32 = shared_map.borrow().values().sum();
+    assert_eq!(total, 116089);
 }
 ```
 

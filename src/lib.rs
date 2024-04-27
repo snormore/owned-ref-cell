@@ -29,23 +29,25 @@
 //!
 //! ```
 //! use owned_ref_cell::OwnedRefCell;
-//! let cell = OwnedRefCell::new(42);
+//! use std::collections::HashMap;
 //!
-//! {
-//!     let value = cell.borrow();
-//!     assert_eq!(*value, 42);
-//!     // Cannot borrow mutably when already borrowed immutably
-//!     assert!(cell.try_borrow_mut().is_none());
-//! }
+//! fn main() {
+//!     let shared_map = OwnedRefCell::new(HashMap::new());
 //!
-//! {
-//!     let mut value = cell.borrow_mut();
-//!     *value = 45;
-//! }
+//!     // Create a new block to limit the scope of the dynamic borrow
+//!     {
+//!         let mut map = shared_map.borrow_mut();
+//!         map.insert("green", 92388);
+//!         map.insert("blue", 11837);
+//!         map.insert("red", 11826);
+//!         map.insert("yellow", 38);
+//!     }
 //!
-//! {
-//!     let value = cell.borrow();
-//!     assert_eq!(*value, 45);
+//!     // Note that if we had not let the previous borrow of the cache fall out
+//!     // of scope then the subsequent borrow would cause a dynamic thread panic.
+//!     // This is the major hazard of using `RefCell`.
+//!     let total: i32 = shared_map.borrow().values().sum();
+//!     assert_eq!(total, 116089);
 //! }
 //! ```
 //!
@@ -183,12 +185,31 @@ impl<T> Drop for OwnedRefMut<T> {
 
 #[cfg(test)]
 mod tests {
-    use std::panic::{self, AssertUnwindSafe};
+    use std::{
+        collections::HashMap,
+        panic::{self, AssertUnwindSafe},
+    };
 
     use super::*;
 
     #[test]
-    fn test_owned_ref_cell_extend_borrow_across_scopes() {
+    fn hashmap_borrow_mut_modify_descope_borrow() {
+        let shared_map = OwnedRefCell::new(HashMap::new());
+
+        {
+            let mut map = shared_map.borrow_mut();
+            map.insert("a", 1);
+            map.insert("b", 2);
+            map.insert("c", 3);
+            map.insert("d", 4);
+        }
+
+        let total: i32 = shared_map.borrow().values().sum();
+        assert_eq!(total, 10);
+    }
+
+    #[test]
+    fn extend_borrow_across_scopes() {
         let cell = OwnedRefCell::new(10);
 
         // Function that extends the mutable borrow across its original scope
