@@ -31,24 +31,22 @@
 //! use owned_ref_cell::OwnedRefCell;
 //! use std::collections::HashMap;
 //!
-//! fn main() {
-//!     let shared_map = OwnedRefCell::new(HashMap::new());
+//! let shared_map = OwnedRefCell::new(HashMap::new());
 //!
-//!     // Create a new block to limit the scope of the dynamic borrow
-//!     {
-//!         let mut map = shared_map.borrow_mut();
-//!         map.insert("green", 92388);
-//!         map.insert("blue", 11837);
-//!         map.insert("red", 11826);
-//!         map.insert("yellow", 38);
-//!     }
-//!
-//!     // Note that if we had not let the previous borrow of the cache fall out
-//!     // of scope then the subsequent borrow would cause a dynamic thread panic.
-//!     // This is the major hazard of using `RefCell`.
-//!     let total: i32 = shared_map.borrow().values().sum();
-//!     assert_eq!(total, 116089);
+//! // Create a new block to limit the scope of the dynamic borrow
+//! {
+//!     let mut map = shared_map.borrow_mut();
+//!     map.insert("green", 92388);
+//!     map.insert("blue", 11837);
+//!     map.insert("red", 11826);
+//!     map.insert("yellow", 38);
 //! }
+//!
+//! // Note that if we had not let the previous borrow of the cache fall out
+//! // of scope then the subsequent borrow would cause a dynamic thread panic.
+//! // This is the major hazard of using `RefCell`.
+//! let total: i32 = shared_map.borrow().values().sum();
+//! assert_eq!(total, 116089);
 //! ```
 //!
 //! This module also provides:
