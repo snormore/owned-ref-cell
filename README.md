@@ -53,6 +53,16 @@ fn main() {
     // This is the major hazard of using `OwnedRefCell`.
     let total: i32 = shared_map.borrow().values().sum();
     assert_eq!(total, 116089);
+
+    // Note that the `OwnedRefMut` outlives the scoped borrow, which would not
+    // compile as a `RefMut` when using `RefCell`.
+    let map_ref = {
+        let mut map = shared_map.borrow_mut();
+        map.insert("purple", 1);
+        map
+    };
+    let total: i32 = map_ref.values().sum();
+    assert_eq!(total, 116090);
 }
 ```
 
