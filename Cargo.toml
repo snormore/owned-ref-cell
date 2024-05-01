@@ -2,6 +2,8 @@
 name = "owned_ref_cell"
 version = "0.1.0"
 edition = "2021"
+description = "Rust library offering a custom RefCell variant with owned references for flexible and dynamic borrowing management."
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
