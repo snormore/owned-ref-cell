@@ -21,7 +21,7 @@ Ensure you have Rust installed on your machine. If not, you can install Rust by 
 
 ### Installation
 
-Add `OwnedRefCell` to your Rust project by including it in your `Cargo.toml` dependencies:
+Add `OwnedRefCell` to your Rust project with `cargo add owned-ref-cell` or by including it in your `Cargo.toml` dependencies directly:
 
 ```toml
 [dependencies]
