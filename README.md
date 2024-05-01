@@ -25,7 +25,7 @@ Add `OwnedRefCell` to your Rust project by including it in your `Cargo.toml` dep
 
 ```toml
 [dependencies]
-owned_ref_cell = { git = "https://github.com/snormore/owned_ref_cell.git" }
+owned_ref_cell = "0.1.0"
 ```
 
 ### Usage
